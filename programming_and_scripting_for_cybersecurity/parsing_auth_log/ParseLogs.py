@@ -107,7 +107,6 @@ def ParseLogs(log):
             logs[usr].succ_logs.append(line.rstrip('\n'))
             logs[usr].logs.append(line.rstrip('\n'))
 
-        # match a failed login
         elif "Failed password for" in line:
             # parse user
             usr = ParseUsr(line)
@@ -122,7 +121,6 @@ def ParseLogs(log):
             logs[usr].fail_logs.append(line.rstrip('\n'))
             logs[usr].logs.append(line.rstrip('\n'))
 
-        # match failed auth
         elif ":auth): authentication failure;" in line:
             # so there are three flavors of authfail we care about;
             # su, sudo, and ssh.  Lets parse each.
@@ -136,13 +134,10 @@ def ParseLogs(log):
                 if usr not in logs:
                     logs[usr] = Log(usr)
                 logs[usr].ips.append(ParseIP(line))
-            # parse sudo/su fails
-            else:
-                if usr not in logs:
-                    logs[usr] = Log(usr)
+            elif usr not in logs:
+                logs[usr] = Log(usr)
             logs[usr].fail_logs.append(line.rstrip('\n'))
             logs[usr].logs.append(line.rstrip('\n'))
-        # match commands
         elif "sudo:" in line:
             # parse user
             usr = ParseUsr(line)

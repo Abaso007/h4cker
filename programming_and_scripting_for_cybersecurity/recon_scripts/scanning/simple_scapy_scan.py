@@ -18,12 +18,7 @@ def arp_scan(ip):
     request = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip)
 
     ans, unans = srp(request, timeout=2, retry=1)
-    result = []
-
-    for sent, received in ans:
-        result.append({'IP': received.psrc, 'MAC': received.hwsrc})
-
-    return result
+    return [{'IP': received.psrc, 'MAC': received.hwsrc} for sent, received in ans]
 
 
 def tcp_scan(ip, ports):
@@ -38,16 +33,14 @@ def tcp_scan(ip, ports):
     try:
         syn = IP(dst=ip) / TCP(dport=ports, flags="S")
     except socket.gaierror:
-        raise ValueError('Hostname {} could not be resolved.'.format(ip))
+        raise ValueError(f'Hostname {ip} could not be resolved.')
 
     ans, unans = sr(syn, timeout=2, retry=1)
-    result = []
-
-    for sent, received in ans:
-        if received[TCP].flags == "SA":
-            result.append(received[TCP].sport)
-
-    return result
+    return [
+        received[TCP].sport
+        for sent, received in ans
+        if received[TCP].flags == "SA"
+    ]
 
 
 def main():
@@ -82,14 +75,10 @@ def main():
         result = arp_scan(args.IP)
 
         for mapping in result:
-            print('{} ==> {}'.format(mapping['IP'], mapping['MAC']))
+            print(f"{mapping['IP']} ==> {mapping['MAC']}")
 
     elif args.command == 'TCP':
-        if args.range:
-            ports = tuple(args.ports)
-        else:
-            ports = args.ports
-        
+        ports = tuple(args.ports) if args.range else args.ports
         try:
             result = tcp_scan(args.IP, ports)
         except ValueError as error:
@@ -97,7 +86,7 @@ def main():
             exit(1)
 
         for port in result:
-            print('Port {} is open.'.format(port))
+            print(f'Port {port} is open.')
 
 
 if __name__ == '__main__':

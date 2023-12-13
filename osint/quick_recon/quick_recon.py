@@ -12,7 +12,10 @@ from plugins import pasting
 Subdomains = []
 
 def SubdomainFilter(URL):
-    Parsed = urlparse(URL); Scheme = Parsed.scheme; Host = Parsed.netloc; URL = Scheme + "://" + Host + "/"
+    Parsed = urlparse(URL)
+    Scheme = Parsed.scheme
+    Host = Parsed.netloc
+    URL = f"{Scheme}://{Host}/"
     if URL not in Subdomains:
         print(URL); Subdomains.append(URL)
 
@@ -52,7 +55,6 @@ Quick OSINT Recon of a given domain
                               """
 print (banner1)
 
-#--------------------------------------------------------------------------------#
 class BlockAll(cookiejar.CookiePolicy):
     return_ok = set_ok = domain_return_ok = path_return_ok = lambda self, *args, **kwargs: False
     netscape = True
@@ -65,17 +67,16 @@ s.cookies.set_policy(BlockAll())
 #--------------------------------------------------------------------------------#
 
 key  = input (colored('[+] Set Target (site.com) : ', 'white' ))#Key
-file = open("quick_recon.config", "w")
-file.write(key)
-file.close()
+with open("quick_recon.config", "w") as file:
+    file.write(key)
 #V2
 #V2
 print("")
 print(colored ('[>] Looking For Subdomains...' ,'green'))
-query = "site:" + key + " -www." + key                            #SubTech1
+query = f"site:{key} -www.{key}"
 for gamma in search(query, tld=beta, num=30 , stop=60 , pause=2):
     SubdomainFilter(URL=gamma)
-query = "site:*." + key                                           #SubTech2
+query = f"site:*.{key}"
 for gamma in search(query, tld=beta, num=30 , stop=60 , pause=2):
     SubdomainFilter(URL=gamma)
 print("")
@@ -84,7 +85,7 @@ if os.path.exists(".google-cookie"):
  os.remove(".google-cookie")
 
 print(colored ('[>] Looking For Sub-Subdomains...' ,'green'))
-query = "site:*.*." + key
+query = f"site:*.*.{key}"
 for gamma in search(query, tld=beta, num=30 , stop=60 , pause=2):
     SubdomainFilter(URL=gamma)
 print("")
@@ -94,12 +95,12 @@ if os.path.exists(".google-cookie"):
 
 
 print(colored ('[>] Looking For Login/Signup Pages...' ,'green'))
-query = "inurl:login site:" + key                                        #LogTech1
+query = f"inurl:login site:{key}"
 for gamma in search(query, tld=beta, num=30 , stop=60 , pause=2):
-    print("" + gamma)
-query = "site:" + key + " inurl:signup | inurl:register | intitle:Signup" #LogTech2
+    print(f"{gamma}")
+query = f"site:{key} inurl:signup | inurl:register | intitle:Signup"
 for gamma in search(query, tld=beta, num=30 , stop=60 , pause=2):
-    print("" + gamma)
+    print(f"{gamma}")
 print ("")
 if os.path.exists(".google-cookie"):
  os.remove(".google-cookie")
@@ -114,26 +115,26 @@ print("")
 #ok
 
 print(colored ('[>] Looking For Directory Listing...' ,'green')) #DirListing
-query = "site:" + key + " intitle:index of"
+query = f"site:{key} intitle:index of"
 for gamma in search(query, tld=zolo, num=10 , stop=60 , pause=2):
-    print("" + gamma)
+    print(f"{gamma}")
 print ("")
 if os.path.exists(".google-cookie"):
  os.remove(".google-cookie")
 
 print(colored ('[>] Looking For Public Exposed Documents...' ,'green')) #Docs
-query = "site:" + key + " ext:doc | ext:docx | ext:odt | ext:pdf | ext:rtf | ext:sxw | ext:psw | ext:ppt | ext:pptx | ext:pps | ext:csv"
+query = f"site:{key} ext:doc | ext:docx | ext:odt | ext:pdf | ext:rtf | ext:sxw | ext:psw | ext:ppt | ext:pptx | ext:pps | ext:csv"
 for gamma in search(query, tld=zolo, num=30 , stop=60 , pause=2):
-    print("" + gamma)
+    print(f"{gamma}")
 print ("")
 if os.path.exists(".google-cookie"):
  os.remove(".google-cookie")
 
 
 print(colored ('[>] Looking For WordPress Entries...' ,'green')) #WP
-query = "site:" + key + " inurl:wp- | inurl:wp-content | inurl:plugins | inurl:uploads | inurl:themes | inurl:download"
+query = f"site:{key} inurl:wp- | inurl:wp-content | inurl:plugins | inurl:uploads | inurl:themes | inurl:download"
 for gamma in search(query, tld=zolo, num=30 , stop=60 , pause=2):
-    print("" + gamma)
+    print(f"{gamma}")
 print ("")
 if os.path.exists(".google-cookie"):
  os.remove(".google-cookie")

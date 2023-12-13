@@ -28,10 +28,7 @@ def is_sensitive_file(file_name):
             return True
 
     _, file_extension = os.path.splitext(file_name)
-    if file_extension in sensitive_extensions:
-        return True
-
-    return False
+    return file_extension in sensitive_extensions
 
 # Function to scan for sensitive files in the specified directory
 def scan_directory(directory):

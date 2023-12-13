@@ -17,14 +17,14 @@ def derive_key(password):
 
     #Making sure I am safe from offline bruteforce attack
 
-    for i in range(NB_ITERATIONS):
+    for _ in range(NB_ITERATIONS):
         start = start ** e
         start %= N
 
     #We are never too cautious let's make it harder
 
     key = 1
-    for i in range(NB_ITERATIONS):
+    for _ in range(NB_ITERATIONS):
         key = key ** e
         key %= N
         key *= start

@@ -6,26 +6,17 @@ TR_SESSION = requests.session()
 
 def get_config():
     global config
-    config={}
-    #options
-    config['threat_response_token_file']='TR-token.txt'
-
-    #credentials
-    config['threat_response_api_client_id']="<INSERT YOUR API CLIENT ID HERE>"
-    config['threat_response_api_client_pass']="<INSERT YOUR API CLIENT PASSWORD HERE>"
-
-    #server (modify only to select region)
-    config['threat_response_server']="visibility.amp.cisco.com"
-    # EU - config['threat_response_server']="visibility.eu.amp.cisco.com
-    # APJ - config['threat_response_server']="visibility.apjc.amp.cisco.com
-
-    #paths (should not need to be modified)
-    config['threat_response_api_root']="iroh/"
-    config['threat_response_token_path']="oauth2/token"
-    config['threat_response_inspect_path']="iroh-inspect/inspect"
-    config['threat_response_deliberate_path']="iroh-enrich/deliberate/observables"
-    config['threat_response_observe_path']="iroh-enrich/observe/observables"
-
+    config = {
+        'threat_response_token_file': 'TR-token.txt',
+        'threat_response_api_client_id': "<INSERT YOUR API CLIENT ID HERE>",
+        'threat_response_api_client_pass': "<INSERT YOUR API CLIENT PASSWORD HERE>",
+        'threat_response_server': "visibility.amp.cisco.com",
+        'threat_response_api_root': "iroh/",
+        'threat_response_token_path': "oauth2/token",
+        'threat_response_inspect_path': "iroh-inspect/inspect",
+        'threat_response_deliberate_path': "iroh-enrich/deliberate/observables",
+        'threat_response_observe_path': "iroh-enrich/observe/observables",
+    }
     #make some useful variables now
     config['TRroot']='https://'+config['threat_response_server']+'/'+config['threat_response_api_root']
     config['inspect_url'] = config['TRroot']+config['threat_response_inspect_path']
@@ -60,12 +51,11 @@ def TR_generate_token():
 def TR_get_token():
     ''' Get the access token from disk, or from auth API
     '''
-    for i in range(2):
+    for _ in range(2):
         while True:
             try:
                 with open(config['threat_response_token_file'], 'r') as token_file:
-                    access_token = token_file.read()
-                    return access_token
+                    return token_file.read()
             except FileNotFoundError:
                 return TR_generate_token()
             break    
@@ -73,9 +63,7 @@ def TR_get_token():
 def TR_unauthorized(response):
     ''' Check the status code of the response
     '''
-    if response.status_code == 401:
-        return True
-    return False
+    return response.status_code == 401
 
 def TR_check_auth(function, param):
     ''' Query the API and validate authentication was successful
@@ -102,33 +90,42 @@ def TR_inspect(text_block):
     '''Inspect the provided text block and extract observables
     '''
 
-    headers = {'Authorization':'Bearer {}'.format(config['access_token']),
-               'Content-Type':'application/json',
-               'Accept':'application/json'}
+    headers = {
+        'Authorization': f"Bearer {config['access_token']}",
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
 
     inspect_payload = {'content':text_block}
     inspect_payload = json.dumps(inspect_payload)
 
-    response = TR_SESSION.post(config['inspect_url'], headers=headers, data=inspect_payload)
-    return response
+    return TR_SESSION.post(
+        config['inspect_url'], headers=headers, data=inspect_payload
+    )
 
 def TR_deliberate(observables):
     ''' Query the deliberate API for observable(s)
     '''
-    headers = {'Authorization':'Bearer {}'.format(config['access_token']),
-               'Content-Type':'application/json',
-               'Accept':'application/json'}
-    response = TR_SESSION.post(config['deliberate_url'], headers=headers, data=json.dumps(observables))
-    return response
+    headers = {
+        'Authorization': f"Bearer {config['access_token']}",
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+    return TR_SESSION.post(
+        config['deliberate_url'], headers=headers, data=json.dumps(observables)
+    )
 
 def TR_observe(observables):
     ''' Query the deliberate API for observable(s)
     '''
-    headers = {'Authorization':'Bearer {}'.format(config['access_token']),
-               'Content-Type':'application/json',
-               'Accept':'application/json'}
-    response = TR_SESSION.post(config['observe_url'], headers=headers, data=json.dumps(observables))
-    return response
+    headers = {
+        'Authorization': f"Bearer {config['access_token']}",
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+    return TR_SESSION.post(
+        config['observe_url'], headers=headers, data=json.dumps(observables)
+    )
 
 def uniq_observables(observables):
     uniqd=[]
@@ -182,8 +179,10 @@ def main():
 
     if len(observables) >50: # semi-arbitrary limit for performance reasons.
         # This is a cop-out. We could break the enrichment process into segments the same way we did the Inspection process
-        # for this example, we'll keep it simple.   
-        sys.exit('NOT doing enrichment! {} is too many observables. Break that input up.'.format(len(observables)))
+        # for this example, we'll keep it simple.
+        sys.exit(
+            f'NOT doing enrichment! {len(observables)} is too many observables. Break that input up.'
+        )
 
     # init results data structure
     results = copy.deepcopy(observables)
@@ -231,18 +230,18 @@ def main():
         item['verdicts_count']=0 #init counter
         item['verdicts_module_list']=[] #init list of modules
         if 'verdicts' in item: #if there are verdicts
-           for verdict in item['verdicts']: #for each one
-               item['verdicts_count']=item['verdicts_count']+1 #increment counter
-               item['verdicts_module_list'].append(verdict['module_name']) #add modulename to list
-           item['verdicts_module_list']=list(set(item['verdicts_module_list'])) #when done, uniq list of modules
+            for verdict in item['verdicts']: #for each one
+                item['verdicts_count'] += 1
+                item['verdicts_module_list'].append(verdict['module_name']) #add modulename to list
+            item['verdicts_module_list']=list(set(item['verdicts_module_list'])) #when done, uniq list of modules
 
         #aggregate sightings
         item['sightings_count']=0#init counter
         item['sightings_module_list']=[]#init list of modules
         if 'sightings' in item: #if there are sightings
             for sighting in item['sightings']:#for each one
-                    item['sightings_count']=item['sightings_count']+sighting['sighting_count']#increment counter
-                    item['sightings_module_list'].append(sighting['module_name'])#add modulename to list
+                item['sightings_count'] += sighting['sighting_count']
+                item['sightings_module_list'].append(sighting['module_name'])#add modulename to list
             item['sightings_module_list']=list(set(item['sightings_module_list']))#when done, uniq list of modules
 
     #filter out unseen observables
@@ -250,10 +249,12 @@ def main():
 
     if len(results)>0: #if there are 1+ entries left in the list of results
         print('the following observables were found in the input and were seen in your environment:')
-        url='https://{}/#/investigate?q='.format(config['threat_response_server'])#init url
+        url = f"https://{config['threat_response_server']}/#/investigate?q="
         for item in results: #for each remaining observable
-            print('{} ({}): {} sightings, {} verdicts'.format(item['value'],item['type'],item['sightings_count'],item['verdicts_count'])) #print the sumamry information
-            url=url+'{}%3A{}%0A'.format(item['type'], item['value']) #and add it to the CTR URL for an investigation
+            print(
+                f"{item['value']} ({item['type']}): {item['sightings_count']} sightings, {item['verdicts_count']} verdicts"
+            )
+            url = f"{url}{item['type']}%3A{item['value']}%0A"
         print('To get more information and investigate these observables in Threat Response, go to the following location:')
         print(url)
 

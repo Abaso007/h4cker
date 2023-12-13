@@ -37,7 +37,7 @@ def tcp_connect_scan(dst_ip,dst_port,dst_timeout):
 def stealth_scan(dst_ip,dst_port,dst_timeout):
     src_port = RandShort()
     stealth_scan_resp = sr1(IP(dst=dst_ip)/TCP(sport=src_port,dport=dst_port,flags="S"),timeout=dst_timeout)
-    if(str(type(stealth_scan_resp))=="<type 'NoneType'>"):
+    if (str(type(stealth_scan_resp))=="<type 'NoneType'>"):
         return "Filtered"
     elif(stealth_scan_resp.haslayer(TCP)):
         if(stealth_scan_resp.getlayer(TCP).flags == 0x12):
@@ -45,8 +45,10 @@ def stealth_scan(dst_ip,dst_port,dst_timeout):
             return "Open"
         elif (stealth_scan_resp.getlayer(TCP).flags == 0x14):
             return "Closed"
-    elif(stealth_scan_resp.haslayer(ICMP)):
-        if(int(stealth_scan_resp.getlayer(ICMP).type)==3 and int(stealth_scan_resp.getlayer(ICMP).code) in [1,2,3,9,10,13]):
+    elif (stealth_scan_resp.haslayer(ICMP)):
+        if int(stealth_scan_resp.getlayer(ICMP).type) == 3 and int(
+            stealth_scan_resp.getlayer(ICMP).code
+        ) in {1, 2, 3, 9, 10, 13}:
             return "Filtered"
     else:
         return "CHECK"
@@ -59,8 +61,10 @@ def xmas_scan(dst_ip,dst_port,dst_timeout):
     elif(xmas_scan_resp.haslayer(TCP)):
         if(xmas_scan_resp.getlayer(TCP).flags == 0x14):
             return "Closed"
-    elif(xmas_scan_resp.haslayer(ICMP)):
-        if(int(xmas_scan_resp.getlayer(ICMP).type)==3 and int(xmas_scan_resp.getlayer(ICMP).code) in [1,2,3,9,10,13]):
+    elif (xmas_scan_resp.haslayer(ICMP)):
+        if int(xmas_scan_resp.getlayer(ICMP).type) == 3 and int(
+            xmas_scan_resp.getlayer(ICMP).code
+        ) in {1, 2, 3, 9, 10, 13}:
             return "Filtered"
     else:
         return "CHECK"
@@ -73,8 +77,10 @@ def fin_scan(dst_ip,dst_port,dst_timeout):
     elif(fin_scan_resp.haslayer(TCP)):
         if(fin_scan_resp.getlayer(TCP).flags == 0x14):
             return "Closed"
-    elif(fin_scan_resp.haslayer(ICMP)):
-        if(int(fin_scan_resp.getlayer(ICMP).type)==3 and int(fin_scan_resp.getlayer(ICMP).code) in [1,2,3,9,10,13]):
+    elif (fin_scan_resp.haslayer(ICMP)):
+        if int(fin_scan_resp.getlayer(ICMP).type) == 3 and int(
+            fin_scan_resp.getlayer(ICMP).code
+        ) in {1, 2, 3, 9, 10, 13}:
             return "Filtered"
     else:
         return "CHECK"
@@ -87,8 +93,10 @@ def null_scan(dst_ip,dst_port,dst_timeout):
     elif(null_scan_resp.haslayer(TCP)):
         if(null_scan_resp.getlayer(TCP).flags == 0x14):
             return "Closed"
-    elif(null_scan_resp.haslayer(ICMP)):
-        if(int(null_scan_resp.getlayer(ICMP).type)==3 and int(null_scan_resp.getlayer(ICMP).code) in [1,2,3,9,10,13]):
+    elif (null_scan_resp.haslayer(ICMP)):
+        if int(null_scan_resp.getlayer(ICMP).type) == 3 and int(
+            null_scan_resp.getlayer(ICMP).code
+        ) in {1, 2, 3, 9, 10, 13}:
             return "Filtered"
     else:
         return "CHECK"
@@ -101,8 +109,10 @@ def ack_flag_scan(dst_ip,dst_port,dst_timeout):
     elif(ack_flag_scan_resp.haslayer(TCP)):
         if(ack_flag_scan_resp.getlayer(TCP).flags == 0x4):
             return "No firewall\n(Unfiltered)"
-    elif(ack_flag_scan_resp.haslayer(ICMP)):
-        if(int(ack_flag_scan_resp.getlayer(ICMP).type)==3 and int(ack_flag_scan_resp.getlayer(ICMP).code) in [1,2,3,9,10,13]):
+    elif (ack_flag_scan_resp.haslayer(ICMP)):
+        if int(ack_flag_scan_resp.getlayer(ICMP).type) == 3 and int(
+            ack_flag_scan_resp.getlayer(ICMP).code
+        ) in {1, 2, 3, 9, 10, 13}:
             return "Stateful firewall present\n(Filtered)"
     else:
         return "CHECK"
@@ -124,20 +134,22 @@ def window_scan(dst_ip,dst_port,dst_timeout):
 def udp_scan(dst_ip,dst_port,dst_timeout):
     udp_scan_resp = sr1(IP(dst=dst_ip)/UDP(dport=dst_port),timeout=dst_timeout)
     if (str(type(udp_scan_resp))=="<type 'NoneType'>"):
-        retrans = []
-        for count in range(0,3):
-            retrans.append(sr1(IP(dst=dst_ip)/UDP(dport=dst_port),timeout=dst_timeout))
+        retrans = [
+            sr1(IP(dst=dst_ip) / UDP(dport=dst_port), timeout=dst_timeout)
+            for _ in range(0, 3)
+        ]
         for item in retrans:
             if (str(type(item))!="<type 'NoneType'>"):
                 udp_scan(dst_ip,dst_port,dst_timeout)
         return "Open|Filtered"
     elif (udp_scan_resp.haslayer(UDP)):
         return "Open"
-    elif(udp_scan_resp.haslayer(ICMP)):
-        if(int(udp_scan_resp.getlayer(ICMP).type)==3 and int(udp_scan_resp.getlayer(ICMP).code)==3):
-            return "Closed"
-        elif(int(udp_scan_resp.getlayer(ICMP).type)==3 and int(udp_scan_resp.getlayer(ICMP).code) in [1,2,9,10,13]):
-            return "Filtered"
+    elif (udp_scan_resp.haslayer(ICMP)):
+        if int(udp_scan_resp.getlayer(ICMP).type)==3:
+            if int(udp_scan_resp.getlayer(ICMP).code) == 3:
+                return "Closed"
+            elif int(udp_scan_resp.getlayer(ICMP).code) in {1, 2, 9, 10, 13}:
+                return "Filtered"
     else:
         return "CHECK"
 
@@ -215,14 +227,12 @@ def main():
 
     timeout = int( args.t)
 
-    if(not len(ports)>0):
-            print("No ports specified.\nUse -h or --help to see the help menu")
-            exit(0)
+    if len(ports) <= 0:
+        print("No ports specified.\nUse -h or --help to see the help menu")
+        exit(0)
 
     ports = list(set(ports))
-    new_ports=[]
-    for item in ports:
-            new_ports.append(int(item))
+    new_ports = [int(item) for item in ports]
     ports = new_ports
     ports.sort()
 
