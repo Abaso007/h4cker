@@ -24,9 +24,9 @@ alpha = f.read()
 key = alpha
 time.sleep(5)
 print(colored ('[>] Looking in Pasting Sites...' ,'green')) #Pasting Sites e.g : PasteBin...
-query = "site:pastebin.com | site:hastebin.com | site:carbon.now.sh " + key
+query = f"site:pastebin.com | site:hastebin.com | site:carbon.now.sh {key}"
 for gamma in search(query, tld=zolo, num=30 , stop=60 , pause=2):
-    print("" + gamma)
+ print(f"{gamma}")
 print ("")
 if os.path.exists(".google-cookie"):
  os.remove(".google-cookie")
