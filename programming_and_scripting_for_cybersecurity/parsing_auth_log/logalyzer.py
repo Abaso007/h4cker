@@ -12,10 +12,7 @@ import ParseLogs
 
 # callback for the user flag
 def user_call(option, opt_str, value, parser):
-    if len(parser.rargs) != 0:
-        value = parser.rargs[0]
-    else:
-        value = None
+    value = parser.rargs[0] if len(parser.rargs) != 0 else None
     setattr(parser.values, option.dest, value)
 
 
@@ -42,7 +39,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     # if they're trying to access /var/log/auth.log without proper privs, bail
-    if not os.getuid() == 0 and options.log is None:
+    if os.getuid() != 0 and options.log is None:
         print("[-] Please run with SUDO")
         sys.exit(1)
 
@@ -56,7 +53,7 @@ if __name__ == "__main__":
 
     # validate the user
     if options.user:
-        if not options.user in LOGS:
+        if options.user not in LOGS:
             print(f"[-] User \'{options.user}\' is not present in the logs.")
             sys.exit(1)
 

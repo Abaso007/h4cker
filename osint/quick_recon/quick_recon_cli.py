@@ -26,4 +26,4 @@ print("")
 print(colored ('[>] Running...' ,'green'))
 query = key
 for gamma in search(query, tld=beta, num=30 , stop=90 , pause=2):
-    print("" + gamma)
+    print(f"{gamma}")
